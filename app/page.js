@@ -4,10 +4,32 @@ import {useState, useEffect} from 'react';
 import {firestore} from '@/firebase';
 import {Box, Modal, Typography, Stack, TextField, Button} from "@mui/material";
 import {collection, deleteDoc, doc, getDoc, getDocs, setDoc, query} from "firebase/firestore";
+import { styled } from "@mui/system";
+
+// Custom Button with Glow Effect
+const GlowingButton = styled(Button)({
+  borderRadius: '8px',
+  textTransform: 'none',
+  transition: '0.3s ease-in-out',
+  '&:hover': {
+    boxShadow: '0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #ffffff',
+  },
+});
+
+// Rounded Box
+const RoundedBox = styled(Box)({
+  borderRadius: '12px',
+  overflow: 'hidden',
+});
+
+// Custom Typography with new Font
+const CustomTypography = styled(Typography)({
+  fontFamily: 'Garamond, sans-serif',
+});
 
 export default function Home() {
   const [inventory, setInventory] = useState([]);
-  const [open, setOpen] = useState(false); //MAKE TEXT BUBBLE SHOW 'USESTATE T/F'
+  const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState('');
 
   const updateInventory = async () => {
@@ -18,47 +40,47 @@ export default function Home() {
       inventoryList.push({
         name: doc.id,
         ...doc.data(),
-      })
-    })
+      });
+    });
     setInventory(inventoryList);
-  }
+  };
 
   const addItem = async (item) => {
     const docRef = doc(collection(firestore, 'inventory'), item);
-    const docSnap = await getDoc(docRef)
+    const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      const {quantity} = docSnap.data()
-      await setDoc(docRef, {quantity: quantity + 1})
+      const { quantity } = docSnap.data();
+      await setDoc(docRef, { quantity: quantity + 1 });
     } else {
-      await setDoc(docRef, {quantity: 1})
+      await setDoc(docRef, { quantity: 1 });
     }
 
-    await updateInventory()
-  }
+    await updateInventory();
+  };
 
   const removeItem = async (item) => {
     const docRef = doc(collection(firestore, 'inventory'), item);
-    const docSnap = await getDoc(docRef)
+    const docSnap = await getDoc(docRef);
 
-    if(docSnap.exists()){
-      const{quantity} = docSnap.data()
+    if (docSnap.exists()) {
+      const { quantity } = docSnap.data();
       if (quantity === 1) {
-        await deleteDoc(docRef)
+        await deleteDoc(docRef);
       } else {
-        await setDoc(docRef, {quantity: quantity - 1})
+        await setDoc(docRef, { quantity: quantity - 1 });
       }
     }
 
-    await updateInventory()
-  }
+    await updateInventory();
+  };
 
   useEffect(() => {
-    updateInventory()
-  }, [])
+    updateInventory();
+  }, []);
 
-  const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false)
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   return (
     <Box 
@@ -69,9 +91,15 @@ export default function Home() {
       justifyContent="center"
       alignItems="center"
       gap={2}
+      sx={{
+        backgroundImage: 'url(/background.jpg)',
+        backgroundColor: '#f0f8ff', 
+        backgroundSize: 'cover', 
+        backgroundPosition: 'center',
+      }}
     >
       <Modal open={open} onClose={handleClose}>
-        <Box
+        <RoundedBox
           position="absolute"
           top="50%"
           left="50%"
@@ -87,84 +115,122 @@ export default function Home() {
             transform: "translate(-50%,-50%)"
           }}
         >
-          <Typography variant="h6">Add Item</Typography>
+          <CustomTypography variant="h6">Add Item</CustomTypography>
           <Stack width="100%" direction="row" spacing={2}>
             <TextField
-              variant="outlined"
+              variant="filled"
               fullWidth
               value={itemName}
               onChange={(e) => {
-                setItemName(e.target.value)
+                setItemName(e.target.value);
               }}
             />
-            <Button 
+            <GlowingButton 
               variant="outlined"
               onClick={() => {
-                addItem(itemName)
-                setItemName('')
-                handleClose()
+                addItem(itemName);
+                setItemName('');
+                handleClose();
               }}
             >
               Add
-            </Button>
+            </GlowingButton>
           </Stack>
-        </Box>
+        </RoundedBox>
       </Modal>
-      <Button variant="contained" onClick={()=>{
-        handleOpen()
-      }}>
+      <GlowingButton variant="contained" onClick={() => handleOpen()}>
         Add New Item
-      </Button>
-      <Box border="1px solid #333">
-        <Box width="800px" height="100px" bgcolor="#ADD8E6" display="flex" alignItems="center" justifyContent="center">
-          <Typography variant="h2" color="#333">
-            Pantry Items
-          </Typography>
+      </GlowingButton>
+      <RoundedBox 
+        border="1px solid #ddd" 
+        width="800px" 
+        bgcolor="#ffffff"
+        boxShadow="0 4px 20px rgba(0, 0, 0, 0.1)"
+        p={2}
+      >
+        <Box 
+          height="100px"
+          display="flex" 
+          alignItems="center" 
+          justifyContent="center"
+        >
+          <CustomTypography variant="h2" color="black">Pantry Items</CustomTypography>
         </Box>
-      <Stack width="800px" height="300px" spacing={2} overflow="auto">
-        {inventory.map(({name, quantity}) => (
-          <Box 
+        <Stack 
+          width="100%" 
+          height="300px" 
+          spacing={2} 
+          overflow="auto" 
+          padding={2}
+          sx={{
+            '&::-webkit-scrollbar': {
+              width: '6px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: '#f0f8ff',
+              borderRadius: '8px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#888',
+              borderRadius: '8px',
+              transition: 'background 0.3s ease',
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              background: '#555',
+            },
+          }}
+        >
+          {inventory.map(({ name, quantity }) => (
+            <RoundedBox 
             key={name}
             width="100%"
-            minHeight="150px"
+            minHeight="100px"
             display="flex"
             alignItems="center"
             justifyContent="space-between"
-            bgcolor="#f0f0f0"
-            padding={5}
+            padding={3}
+            sx={{
+              backgroundColor: '#F5F5DC',
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
+              transition: 'transform 0.2s',
+              '&:hover': {
+                transform: 'scale(1.02)', // Slightly scale on hover
+              },
+            }}
           >
-            <Typography
-              variant="h3"
+            <CustomTypography
+              variant="h5"
               color="#333"
               textAlign="center"
+              sx={{ flexGrow: 0, marginRight: 'auto' }}
             >
               {name.charAt(0).toUpperCase() + name.slice(1)}
-            </Typography>
-            <Typography
-              variant="h3"
-              color="#333"
-              textAlign="center"
+            </CustomTypography>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={2}
+              sx={{ flexGrow: 0 }}
             >
-              {quantity}
-            </Typography>
-            <Stack direction="row" spacing={2}>
-            <Button variant="contained" onClick={()=>{
-              addItem(name)
-            }}
-            >
-              Add
-            </Button>
-            <Button variant="contained" onClick={()=>{
-              removeItem(name)
-            }}
-            >
-              Remove
-            </Button>
+              <CustomTypography
+                variant="h5"
+                color="#333"
+                textAlign="center"
+                sx={{ width: '50px' }}
+              >
+                {quantity}
+              </CustomTypography>
+              <GlowingButton variant="contained" onClick={() => addItem(name)}>
+                Add
+              </GlowingButton>
+              <GlowingButton variant="contained" onClick={() => removeItem(name)}>
+                Remove
+              </GlowingButton>
             </Stack>
-          </Box>
-        ))}
-      </Stack>
-      </Box>
+          </RoundedBox>          
+          ))}
+        </Stack>
+      </RoundedBox>
     </Box>
-  )
+  );
 }
