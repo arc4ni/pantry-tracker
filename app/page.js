@@ -8,7 +8,7 @@ import { styled } from "@mui/system";
 
 // Custom Button with Glow Effect
 const GlowingButton = styled(Button)({
-  borderRadius: '8px',
+  borderRadius: '10px',
   textTransform: 'none',
   transition: '0.3s ease-in-out',
   '&:hover': {
